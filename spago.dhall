@@ -5,7 +5,16 @@ You can edit this file as you like.
 { name =
     "my-project"
 , dependencies =
-    [ "console", "effect", "psci-support", "test-unit" ]
+    [ "aff-promise"
+    , "arrays"
+    , "console"
+    , "effect"
+    , "node-fs-aff"
+    , "now"
+    , "psci-support"
+    , "simple-json"
+    , "test-unit"
+    ]
 , packages =
     ./packages.dhall
 }

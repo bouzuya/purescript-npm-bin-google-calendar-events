@@ -17,7 +17,11 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console as Console
 import Effect.Exception as Exception
 import Node.Process as Process
-import Prelude (Unit, bind, const, discard, map, otherwise, pure, (<>))
+import Prelude (Unit, bind, const, discard, map, otherwise, pure, (<<<), (<>), (==))
+import Simple.JSON as SimpleJSON
+
+showEventsAsJSON :: Array Event -> Effect Unit
+showEventsAsJSON = Console.log <<< SimpleJSON.writeJSON
 
 showEvents :: Array Event -> Effect Unit
 showEvents events
@@ -40,7 +44,8 @@ help =
     [ "Usage: google-calendar-events [options]"
     , ""
     , "Options:"
-    , "  -h, --help help"
+    , "  -f, --format <FORMAT> format (json|text)"
+    , "  -h, --help            help"
     , ""
     ]
 
@@ -52,7 +57,10 @@ main = do
         (const (Exception.throw "invalid options"))
         pure
         (CommandLineOption.parse
-          { help: CommandLineOption.booleanOption "help" (Just 'h') "help" }
+          { format:
+              CommandLineOption.stringOption
+                "format" (Just 'f') "<FORMAT>" "format (json|text)" "text"
+          , help: CommandLineOption.booleanOption "help" (Just 'h') "help" }
           args)
   if options.help
     then Console.log help
@@ -75,4 +83,7 @@ main = do
             (Exception.throw "JSON parse error")
             pure
             responseMaybe)
-      liftEffect (showEvents response.data.items)
+      let
+        formatter =
+          if options.format == "json" then showEventsAsJSON else showEvents
+      liftEffect (formatter response.data.items)

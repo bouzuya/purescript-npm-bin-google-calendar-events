@@ -11,6 +11,7 @@ You can edit this file as you like.
     , "console"
     , "effect"
     , "node-fs-aff"
+    , "node-process"
     , "now"
     , "psci-support"
     , "simple-json"

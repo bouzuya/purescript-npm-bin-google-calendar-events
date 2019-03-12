@@ -11,7 +11,8 @@ import Effect.Aff as Aff
 import Effect.Class (liftEffect)
 import Effect.Class.Console as Console
 import Effect.Exception as Exception
-import Prelude (Unit, bind, discard, otherwise, pure, (<>))
+import Node.Process as Process
+import Prelude (Unit, bind, discard, map, otherwise, pure, (<>))
 
 showEvents :: Array Event -> Effect Unit
 showEvents events
@@ -29,6 +30,8 @@ showEvents events
 
 main :: Effect Unit
 main = Aff.launchAff_ do
+  args <- liftEffect (map (Array.drop 2) Process.argv)
+  Console.logShow args
   jsDate <- liftEffect JSDate.now
   timeMin <- liftEffect (JSDate.toISOString jsDate)
   client <- CalendarEvents.newClient

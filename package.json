@@ -1,5 +1,5 @@
 {
-  "name": "purescript-npm-bin-google-calendar-events",
+  "name": "@bouzuya/google-calendar-events",
   "description": "Google Calendar events",
   "version": "0.1.0",
   "author": {

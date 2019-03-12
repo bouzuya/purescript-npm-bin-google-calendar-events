@@ -7,7 +7,7 @@
     "name": "bouzuya",
     "email": "m@bouzuya.net"
   },
-  "bin": "bin/purescript-npm-bin-google-calendar-events",
+  "bin": "bin/google-calendar-events",
   "bugs": {
     "url": "https://github.com/bouzuya/purescript-npm-bin-google-calendar-events/issues"
   },

@@ -44,7 +44,8 @@ help =
     [ "Usage: google-calendar-events [options]"
     , ""
     , "Options:"
-    , "  -f, --format <FORMAT> format (json|text)"
+    , "  -f, --format <json|text> format (default:text)"
+    , "  -i, --id <ID>         calendar id (default:primary)"
     , "  -h, --help            help"
     , ""
     ]
@@ -59,7 +60,10 @@ main = do
         (CommandLineOption.parse
           { format:
               CommandLineOption.stringOption
-                "format" (Just 'f') "<FORMAT>" "format (json|text)" "text"
+                "format" (Just 'f') "<json|text>" "format" "text"
+          , id:
+              CommandLineOption.stringOption
+                "id" (Just 'i') "<ID>" "calendar id" "primary"
           , help: CommandLineOption.booleanOption "help" (Just 'h') "help" }
           args)
   if options.help
@@ -70,7 +74,7 @@ main = do
       client <- CalendarEvents.newClient
       responseMaybe <-
         CalendarEvents.listEvents
-          { calendarId: "primary"
+          { calendarId: options.id
           , maxResults: 10
           , orderBy: "startTime"
           , singleEvents: true

@@ -33,34 +33,46 @@ showEvents events
               event.start.dateTime
         Console.log (start <> " - " <> event.summary)
 
+help :: String
+help =
+  Array.intercalate
+    "\n"
+    [ "Usage: google-calendar-events [options]"
+    , ""
+    , "Options:"
+    , "  -h, --help help"
+    , ""
+    ]
+
 main :: Effect Unit
-main = Aff.launchAff_ do
-  args <- liftEffect (map (Array.drop 2) Process.argv)
+main = do
+  args <- map (Array.drop 2) Process.argv
   { options } <-
-    liftEffect
-      (Either.either
+      Either.either
         (const (Exception.throw "invalid options"))
         pure
         (CommandLineOption.parse
           { help: CommandLineOption.booleanOption "help" (Just 'h') "help" }
-          args))
-  Console.logShow options
-  jsDate <- liftEffect JSDate.now
-  timeMin <- liftEffect (JSDate.toISOString jsDate)
-  client <- CalendarEvents.newClient
-  responseMaybe <-
-    CalendarEvents.listEvents
-      { calendarId: "primary"
-      , maxResults: 10
-      , orderBy: "startTime"
-      , singleEvents: true
-      , timeMin
-      }
-      client
-  response <-
-    liftEffect
-      (Maybe.maybe
-        (Exception.throw "JSON parse error")
-        pure
-        responseMaybe)
-  liftEffect (showEvents response.data.items)
+          args)
+  if options.help
+    then Console.log help
+    else Aff.launchAff_ do
+      jsDate <- liftEffect JSDate.now
+      timeMin <- liftEffect (JSDate.toISOString jsDate)
+      client <- CalendarEvents.newClient
+      responseMaybe <-
+        CalendarEvents.listEvents
+          { calendarId: "primary"
+          , maxResults: 10
+          , orderBy: "startTime"
+          , singleEvents: true
+          , timeMin
+          }
+          client
+      response <-
+        liftEffect
+          (Maybe.maybe
+            (Exception.throw "JSON parse error")
+            pure
+            responseMaybe)
+      liftEffect (showEvents response.data.items)

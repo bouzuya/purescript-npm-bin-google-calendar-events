@@ -1,10 +1,15 @@
-module Main where
+module Main
+  ( main
+  ) where
 
+import Bouzuya.CommandLineOption as CommandLineOption
 import CalendarEvents (Event)
 import CalendarEvents as CalendarEvents
 import Data.Array as Array
+import Data.Either as Either
 import Data.Foldable as Foldable
 import Data.JSDate as JSDate
+import Data.Maybe (Maybe(..))
 import Data.Maybe as Maybe
 import Effect (Effect)
 import Effect.Aff as Aff
@@ -12,7 +17,7 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console as Console
 import Effect.Exception as Exception
 import Node.Process as Process
-import Prelude (Unit, bind, discard, map, otherwise, pure, (<>))
+import Prelude (Unit, bind, const, discard, map, otherwise, pure, (<>))
 
 showEvents :: Array Event -> Effect Unit
 showEvents events
@@ -31,7 +36,15 @@ showEvents events
 main :: Effect Unit
 main = Aff.launchAff_ do
   args <- liftEffect (map (Array.drop 2) Process.argv)
-  Console.logShow args
+  { options } <-
+    liftEffect
+      (Either.either
+        (const (Exception.throw "invalid options"))
+        pure
+        (CommandLineOption.parse
+          { help: CommandLineOption.booleanOption "help" (Just 'h') "help" }
+          args))
+  Console.logShow options
   jsDate <- liftEffect JSDate.now
   timeMin <- liftEffect (JSDate.toISOString jsDate)
   client <- CalendarEvents.newClient

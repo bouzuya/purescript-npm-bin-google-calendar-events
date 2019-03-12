@@ -44,9 +44,10 @@ help =
     [ "Usage: google-calendar-events [options]"
     , ""
     , "Options:"
-    , "  -f, --format <json|text> format (default:text)"
-    , "  -i, --id <ID>         calendar id (default:primary)"
-    , "  -h, --help            help"
+    , "  -d, --directory <DIRECTORY> {credentials,token}.json directory(default:.)"
+    , "  -f, --format <json|text>    format (default:text)"
+    , "  -i, --id <ID>               calendar id (default:primary)"
+    , "  -h, --help                  help"
     , ""
     ]
 
@@ -58,7 +59,14 @@ main = do
         (const (Exception.throw "invalid options"))
         pure
         (CommandLineOption.parse
-          { format:
+          { directory:
+              CommandLineOption.stringOption
+                "directory"
+                (Just 'd')
+                "<DIRECTORY>"
+                "{credentials,token}.json directory"
+                "."
+          , format:
               CommandLineOption.stringOption
                 "format" (Just 'f') "<json|text>" "format" "text"
           , id:
@@ -71,7 +79,7 @@ main = do
     else Aff.launchAff_ do
       jsDate <- liftEffect JSDate.now
       timeMin <- liftEffect (JSDate.toISOString jsDate)
-      client <- CalendarEvents.newClient
+      client <- CalendarEvents.newClient options.directory
       responseMaybe <-
         CalendarEvents.listEvents
           { calendarId: options.id

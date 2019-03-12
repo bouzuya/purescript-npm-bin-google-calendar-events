@@ -8,18 +8,15 @@ module CalendarEvents
 
 import Control.Promise (Promise)
 import Control.Promise as Promise
-import Data.Array as Array
-import Data.Foldable as Foldable
 import Data.Maybe (Maybe)
-import Data.Maybe as Maybe
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Effect.Class.Console as Console
 import Foreign (Foreign)
 import Node.Encoding as Encoding
 import Node.FS.Aff as FS
-import Prelude (Unit, bind, discard, otherwise, pure, (<>))
+import Node.Path as Path
+import Prelude (bind, pure)
 import Simple.JSON as SimpleJSON
 
 foreign import data Client :: Type
@@ -41,27 +38,15 @@ type ListEventResponse =
     }
   }
 
-showEvents :: Array Event -> Effect Unit
-showEvents events
-  | Array.null events =
-      Console.log "No upcoming events found."
-  | otherwise = do
-      Console.log "Upcoming 10 events:"
-      Foldable.for_ events \event -> do
-        let
-          start =
-            Maybe.fromMaybe
-              (Maybe.fromMaybe "" event.start.date)
-              event.start.dateTime
-        Console.log (start <> " - " <> event.summary)
-
 listEvents :: forall r. { | r } -> Client -> Aff (Maybe ListEventResponse)
 listEvents options client = do
   response <- Promise.toAffE (listEventsImpl options client)
   pure (SimpleJSON.read_ response)
 
-newClient :: Aff Client
-newClient = do
-  credentials <- FS.readTextFile Encoding.UTF8 "credentials.json"
-  token <- FS.readTextFile Encoding.UTF8 "token.json"
+newClient :: String -> Aff Client
+newClient dir = do
+  credentials <-
+    FS.readTextFile Encoding.UTF8 (Path.concat [dir, "credentials.json"])
+  token <-
+    FS.readTextFile Encoding.UTF8 (Path.concat [dir, "token.json"])
   liftEffect (newClientImpl credentials token)

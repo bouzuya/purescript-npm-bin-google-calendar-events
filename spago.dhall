@@ -7,6 +7,7 @@ You can edit this file as you like.
 , dependencies =
     [ "aff-promise"
     , "arrays"
+    , "bouzuya-command-line-option-parser"
     , "console"
     , "effect"
     , "node-fs-aff"
